@@ -55,7 +55,7 @@ describe('api test', () => {
   })
 
   test('likes property default to 0', async () => {
-    const noteWithOutLikes = {    
+    const blogWithOutLikes = {    
       title: 'post blog entry',
       author: 'String',
       url: 'String',
@@ -63,7 +63,7 @@ describe('api test', () => {
 
     const postedBlog = await api 
       .post('/api/blogs')
-      .send(noteWithOutLikes)
+      .send(blogWithOutLikes)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -82,6 +82,24 @@ describe('api test', () => {
       .expect(400)
   })
   
+  test('delete valid id', async () => {
+    const blogToDelete = await helper.blogsInDb()
+    await api
+      .delete(`/api/blogs/${blogToDelete[0].id}`)
+      .expect(204)
+  })
+
+  test('update a valid note', async () => {
+    const blogInDb = await helper.blogsInDb()
+    const someBlog = blogInDb[0]
+    const beforeLikes = someBlog.likes
+    someBlog.likes = beforeLikes + 1
+
+    await api
+      .put(`/api/blogs/${someBlog.id}`)
+      .send(someBlog)
+      .expect(200)
+  })
 })
 
 afterAll(() => mongoose.connection.close())
